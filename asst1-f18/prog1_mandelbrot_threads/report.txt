@@ -1,1 +1,18 @@
-serial time: 710.195 ms
+First Question:
+    serial time:     710.195 ms
+
+    # thread    | # running time    | # speed up
+        2       |   673.053 ms      |   1.07X
+        3       |   402.516 ms      |   1.76X
+        4       |   458.315 ms      |   1.55X
+        5       |   409.406 ms      |   1.73X
+        6       |   318.753 ms      |   2.22X
+        7       |   291.773 ms      |   2.43X
+        8       |   277.422 ms      |   2.55X
+        9       |   238.134 ms      |   2.98X
+        10      |   215.248 ms      |   3.29X
+        16      |   139.170 ms      |   5.12X
+
+
+    My Hypothesis:
+        the curve should be an upper convex Function
