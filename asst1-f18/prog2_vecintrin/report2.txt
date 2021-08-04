@@ -13,5 +13,12 @@ The Required Part:
 Question:
     how to handle the case where the total number of loop iterations is not a multiple of SIMD vector width.
 A:
-    Analyzing: check main.cpp::verifyResult finding that unmatching result happening out of the index. So the solution is to make sure the outside-part also caculate correctly instead of intercepting the last segments of data.
-    Resolution: creat an array whose size is Vector_WIDTH putting the last segments in data at fisrt, 1 at latter.
+    Analyzing:
+        1. check main.cpp::initValue finding that program assign array #(N+VEC_WIDTH) space instead of only N.
+        2. check CMU418intrin.h finding that all relating-vectors are assigned with #(VEC_WIDTH) size, as a result, we could not get other size relating-vectors.
+        3. check main.cpp::verifyResult finding that unmatching result happening out of the index. So the solution is to make sure the outside-part also caculate correctly. The gold array is obtained by the seriel function which only caculate N value lefting the rest to 0.
+
+    Resolution:
+        1. we need a signal b_is_last_seg to indicate whether the segment we deal currently is the last seg. If b_is_last_seg is true. then we back the index to the start of the last #(VEC_WIDTH) elements since we couldn't change the size of cmu_vector.
+        2. set Base[N, N+VEC_WIDTH] = 0 then 0^N = 0 which consistent with gold array obtained from seriel function.
+        3. init required mask val within the while loop.
