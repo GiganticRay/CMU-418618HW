@@ -1,0 +1,17 @@
+The Required Part:
+    CLAMPED EXPONENT (required)
+    Results matched with answer!
+    ****************** Printing Vector Unit Statistics *******************
+    Vector Width:              8
+    Total Vector Instructions: 142
+    Vector Utilization:        92.165493%
+    Utilized Vector Lanes:     1047
+    Total Vector Lanes:        1136
+    ************************ Result Verification *************************
+    Passed!!!
+
+Question:
+    how to handle the case where the total number of loop iterations is not a multiple of SIMD vector width.
+A:
+    Analyzing: check main.cpp::verifyResult finding that unmatching result happening out of the index. So the solution is to make sure the outside-part also caculate correctly instead of intercepting the last segments of data.
+    Resolution: creat an array whose size is Vector_WIDTH putting the last segments in data at fisrt, 1 at latter.

@@ -32,6 +32,7 @@ struct __cmu418_mask : __cmu418_vec<bool> {};
 //* Function Definition *
 //***********************
 
+// Q: what is the maning of lane?
 // Return a mask initialized to 1 in the first N lanes and 0 in the others
 __cmu418_mask _cmu418_init_ones(int first = VECTOR_WIDTH);
 
@@ -47,10 +48,11 @@ __cmu418_mask _cmu418_mask_and(__cmu418_mask &maska, __cmu418_mask &maskb);
 // Count the number of 1s in maska
 int _cmu418_cntbits(__cmu418_mask &maska);
 
-// Set register to value if vector lane is active
-//  otherwise keep the old value
+// Set register to value if vector lane is active otherwise keep the old value
+// the meaning of active: the corrosponding bit is 1.
 void _cmu418_vset_float(__cmu418_vec_float &vecResult, float value, __cmu418_mask &mask);
 void _cmu418_vset_int(__cmu418_vec_int &vecResult, int value, __cmu418_mask &mask);
+
 // For user's convenience, returns a vector register with all lanes initialized to value
 __cmu418_vec_float _cmu418_vset_float(float value);
 __cmu418_vec_int _cmu418_vset_int(int value);
@@ -88,7 +90,7 @@ void _cmu418_vmult_int(__cmu418_vec_int &vecResult, __cmu418_vec_int &veca, __cm
 // Return calculation of (veca / vecb) if vector lane active
 //  otherwise keep the old value
 void _cmu418_vdiv_float(__cmu418_vec_float &vecResult, __cmu418_vec_float &veca, __cmu418_vec_float &vecb, __cmu418_mask &mask);
-void _cmu418_vdiv_int(__cmu418_vec_int &vecResult, __cmu418_vec_int &veca, __cmu418_vec_int &vecb, __cmu418_mask &mask);
+void _cmu419_vdiv_int(__cmu418_vec_int &vecResult, __cmu418_vec_int &veca, __cmu418_vec_int &vecb, __cmu418_mask &mask);
 
 // Return calculation of (veca >> vecb) if vector lane active
 //  otherwise keep the old value
@@ -101,7 +103,7 @@ void _cmu418_vbitand_int(__cmu418_vec_int &vecResult, __cmu418_vec_int &veca, __
 // Return calculation of absolute value abs(veca) if vector lane active
 //  otherwise keep the old value
 void _cmu418_vabs_float(__cmu418_vec_float &vecResult, __cmu418_vec_float &veca, __cmu418_mask &mask);
-void _cmu418_vabs_int(__cmu418_vec_int &vecResult, __cmu418_vec_int &veca, __cmu418_mask &mask);
+void _cmu419_vabs_int(__cmu418_vec_int &vecResult, __cmu418_vec_int &veca, __cmu418_mask &mask);
 
 // Return a mask of (veca > vecb) if vector lane active
 //  otherwise keep the old value

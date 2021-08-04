@@ -30,7 +30,7 @@ float arraySumVector(float* values, int N);
 bool verifyResult(float* values, int* exponents, float* output, float* gold, int N);
 
 int main(int argc, char * argv[]) {
-  int N = 16;
+  int N = 8;
   bool printLog = false;
 
   // parse commandline options ////////////////////////////////////////////
