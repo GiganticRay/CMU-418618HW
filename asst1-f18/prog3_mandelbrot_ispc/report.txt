@@ -1,0 +1,35 @@
+microsoft code: ispc.github.io/example.html
+
+BACK INFO:
+    The ISPC compiler is configured to emit 8-wide AVX2 vector instructions.
+Q 3.1.1:
+    8-wide, of course 8 times.
+Q 3.1.2:
+    mandelbrot run on the single CPU core speed up processing by manipulating multiple elements using a single instruction. BUT AVX2 CPI must higher than the normal CPU, so the speedup is not linear to the normal serial code though the instructions needed reduced linearly.
+
+Q 3.2.1:
+    [mandelbrot serial]:            [293.697] ms
+    Wrote image file mandelbrot-serial.ppm
+    [mandelbrot ispc]:              [70.258] ms
+    Wrote image file mandelbrot-ispc.ppm
+    [mandelbrot multicore ispc]:    [47.905] ms
+    Wrote image file mandelbrot-task-ispc.ppm
+                                    (4.18x speedup from ISPC)
+                                    (6.13x speedup from task ISPC)
+    TASK ENVIRONMENT:
+        According to the setting of mandelbrot.ispc::mandelbrot_ispc_withtasks, the threadCount = 2, so the maximine speedup of task-version compared with single core version is 2x. But the data shows the speedup is 6.13/4.18. The reason simply came out of my mind is the connection comsumption between cores.
+
+Q 3.2.2:
+    How did you determine how many tasks to creat?
+    A: using script to change the parameter of threadCount, Drawing graph based on these different threadCount to get the optimize point.
+    Dealing with the situation that the rows in the image is not divisible by the number of tasks.
+    A: EASY!!! check out mandelbrot.ispc::mandelbrot_ispc_task, it has already copying with the fontier of last segment, so what we need to do in mandelbrot.ispc::mandelbrot_ispc_withtasks is only determine whether adding or not a thread which used to caculate the extra part of data.
+
+Q 3.2.3(extra Question)
+    Differences between the Pthread and ISPC
+    A: Pthread just create new threads which run simutaneously. ISPC, as described in the work description....em.... I don't know the answer, but I find that this is the content of the future course.
+
+Q Bonus:
+    the difference bwtween foreach and launch
+    A: In terms of my view from now on, foreach is running just like the serial function. the difference bwtween serial and foreach is their running CPU, the first is common cpu, the latter is vector cpu. The reason that vector cpu could sppedup is that the cooprating unit in vector cpu is VECTOR. LAUNCH is more like creating multiple threads running on different cores. so it's at the same level of multiple threads.
+    From simplicity, foreach is still a single thread, LAUNCH is already in the level of multiple threads.

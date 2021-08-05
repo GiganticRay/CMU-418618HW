@@ -17,6 +17,9 @@ static inline int mandel(float c_re, float c_im, int count) {
     return i;
 }
 
+
+// the export qualifier eindicates that this function should be made available to be called by C/C++ code, not just from other ispc functions.
+// uniform: indicates that a variable has the same value for all of the concurrently-executing program instances. Any values passed from the application to the ispc program must be uniform.
 export void mandelbrot_ispc(uniform float x0, uniform float y0, 
                             uniform float x1, uniform float y1,
                             uniform int width, uniform int height, 
@@ -68,10 +71,11 @@ export void mandelbrot_ispc_withtasks(uniform float x0, uniform float y0,
                                       uniform int output[])
 {
 
-    uniform int threadCount = 2;
+    uniform int threadCount = 74;
     uniform int rowsPerTask = height / threadCount;
 
     // create threadCount tasks
+    threadCount = height%threadCount == 0 ? threadCount : threadCount+1;
     launch[threadCount] mandelbrot_ispc_task(x0, y0, x1, y1,
                                      width, height,
                                      rowsPerTask,

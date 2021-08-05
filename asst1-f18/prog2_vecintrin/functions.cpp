@@ -154,7 +154,7 @@ void clampedExpVector(float* values, int* exponents, float* output, int N) {
 float arraySumSerial(float* values, int N) {
     float sum = 0;
     for (int i=0; i<N; i++) {
-	sum += values[i];
+		sum += values[i];
     }
 
     return sum;
