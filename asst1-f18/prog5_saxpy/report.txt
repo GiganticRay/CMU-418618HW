@@ -1,0 +1,14 @@
+Q 5.1: performance report, how it can be substantially improved?
+A: performance (64 tasks which suitable with the number of logical processor)
+    [saxpy serial]:         [18.617] ms     [16.008] GB/s   [1.074] GFLOPS
+    [saxpy streaming]:      [18.327] ms     [16.261] GB/s   [1.091] GFLOPS
+    [saxpy ispc]:           [18.501] ms     [16.108] GB/s   [1.081] GFLOPS
+    [saxpy task ispc]:      [4.822] ms      [61.803] GB/s   [4.148] GFLOPS
+                                    (1.02x speedup from streaming)
+                                    (1.01x speedup from ISPC)
+                                    (3.86x speedup from task ISPC)
+A: I do not know...
+
+Q 5.2: I do not know...
+
+Q 5.3: how do reducie the memory requirement to 3 x....

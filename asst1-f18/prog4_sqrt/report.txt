@@ -1,0 +1,23 @@
+Q 4.1
+    speedup due to CPU CORE, using cores with 64 tasks seperately.
+    A:  random initial value
+    [sqrt serial]:          [1127.769] ms
+    [sqrt ispc]:            [293.456] ms
+    [sqrt task ispc]:       [12.110] ms
+                                    (3.84x speedup from ISPC)
+                                    (93.13x speedup from task ISPC)
+        Good Initial value
+    [sqrt serial]:          [36.303] ms
+    [sqrt ispc]:            [13.165] ms
+    [sqrt task ispc]:       [3.353] ms
+                                    (2.76x speedup from ISPC)
+                                    (10.83x speedup from task ISPC)
+        Bad Initial value
+    [sqrt serial]:          [5500.173] ms
+    [sqrt ispc]:            [736.165] ms
+    [sqrt task ispc]:       [37.677] ms
+                                    (7.47x speedup from ISPC)
+                                    (145.98x speedup from task ISPC)
+
+Q 4.2: The influence of different initial guessing value.
+    This question relats to the problem of convergence proof of newton-method. What I should pay attention is the initial value of x_1.

@@ -23,7 +23,7 @@ using namespace ispc;
 
 int main() {
     const unsigned int N = 20 * 1000 * 1000; // 20 M element vectors (~80 MB)
-    const unsigned int TOTAL_BYTES = 4 * N * sizeof(float);
+    const unsigned int TOTAL_BYTES = 4 * N * sizeof(float); // total number of memory bytes.
     const unsigned int TOTAL_FLOPS = N;
 
     float scale = 2.f;
