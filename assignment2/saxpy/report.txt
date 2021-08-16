@@ -1,0 +1,19 @@
+execution Situation:
+Overall time: 50.866 ms         [4.394 GB/s]
+Over kernel time: 0.000249 ms
+
+recall the serial execution Situation:
+performance (64 tasks which suitable with the number of logical processor)
+[saxpy serial]:         [18.617] ms     [16.008] GB/s   [1.074] GFLOPS
+[saxpy streaming]:      [18.327] ms     [16.261] GB/s   [1.091] GFLOPS
+[saxpy ispc]:           [18.501] ms     [16.108] GB/s   [1.081] GFLOPS
+[saxpy task ispc]:      [4.822] ms      [61.803] GB/s   [4.148] GFLOPS
+            (1.02x speedup from streaming)
+            (1.01x speedup from ISPC)
+            (3.86x speedup from task ISPC)
+
+Q2: the difference between the timer I added and the timer that was already in the provided starter code.
+A: The difference is whther use cudaDeviceSynchronize() which will hold and stall untill all the cuda operations finished or not.
+
+Q3: Are the bandwidth values observed roughly consistent with the reported bandwidths available to the different componets of the machine?
+A: this require the knowledge of how multiple-GPU cooperates with each other.
