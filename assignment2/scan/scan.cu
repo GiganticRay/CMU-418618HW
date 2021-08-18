@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <math.h>
 
 #include <cuda.h>
 #include <cuda_runtime.h>
@@ -10,6 +11,7 @@
 #include <thrust/device_free.h>
 
 #include "CycleTimer.h"
+#include "CudaError.cu"
 
 extern float toBW(int bytes, float sec);
 
@@ -28,6 +30,67 @@ static inline int nextPow2(int n)
     return n;
 }
 
+/* example for nextPow2
+// 以指数的速率将低位覆盖以1
+#include <iostream>
+#include <bitset>
+using namespace std;
+
+int nextPow2(int n)
+{
+    n--;
+    cout << "n--\t\t\t" << bitset<32>(n) << endl;
+    n |= n >> 1;
+    cout << "n >> 1 \t\t" << bitset<32>(n) << endl;
+    n |= n >> 2;
+    cout << "n >> 2 \t\t" << bitset<32>(n) << endl;
+    n |= n >> 4;
+    cout << "n >> 4 \t\t" << bitset<32>(n) << endl;
+    n |= n >> 8;
+    cout << "n >> 8 \t\t" << bitset<32>(n) << endl;
+    n |= n >> 16;
+    cout << "n >> 16 \t" << bitset<32>(n) << endl;
+    n++;
+    cout << "n++ \t\t" << bitset<32>(n) << endl;
+    return n;
+}
+
+int main() {
+    int n = 96;
+    cout << "\t\t\t" << bitset<32>(n) << endl;
+    cout << nextPow2(n) << endl;
+}
+*/
+
+
+// implement parallel part of up_sweep phase
+__global__ void kernel_scan_up_sweep(int* device_array, int length, int step){
+    int index =     blockIdx.x*blockDim.x + threadIdx.x;
+    int grid_size = gridDim.x*blockDim.x;
+    for (int i = index+1; i*step-1 < length; i+=grid_size)
+    {
+        device_array[i*step-1] += device_array[i*step - step/2 - 1]; 
+    }
+}
+
+// implement parallel part of down_sweep phase
+__global__ void kernel_scan_down_sweep(int* device_array, int length, int step){
+    int index =     blockIdx.x*blockDim.x + threadIdx.x;
+    int grid_size = gridDim.x*blockDim.x;
+    for (int i = index+1; i*step-1 < length; i+=grid_size)
+    {
+        int tmp = device_array[i*step - step/2 - 1];
+        device_array[i*step - step/2 - 1] = device_array[i*step-1];
+        device_array[i*step-1] += tmp;
+    }
+    
+}
+
+// assign the value of element whose index is n to v
+__global__ void kernel_assign(int *device_array, int n, int v){
+    device_array[n] = v;
+}
+
 void exclusive_scan(int* device_start, int length, int* device_result)
 {
     /* Fill in this function with your exclusive scan implementation.
@@ -39,6 +102,38 @@ void exclusive_scan(int* device_start, int length, int* device_result)
      * both the input and the output arrays are sized to accommodate the next
      * power of 2 larger than the input.
      */
+    cudaMemcpy(device_result, device_start, length*sizeof(int), cudaMemcpyDeviceToDevice);
+
+    int grid_size   = 108;
+    int block_size  = 1024;
+
+    // 1. up_sweep parallel phase
+    printf("Starting up-sweep phase: \n");
+    for(int level=1; level<log2(length); level++){
+        printf("up-sweep phase\tlevel=%d\n", level);
+        int step = pow(2, level);
+
+        kernel_scan_up_sweep<<<grid_size, block_size>>>(device_result, length, step);
+        checkLastCuda();
+        checkCuda(cudaDeviceSynchronize());
+    }
+
+    // 2. set the last element of mid-result to 0.`
+    // NOTICE!!!!!!: manipulate device memory in host code will invoke error:"Segmentation fault (core dumped)". Instead I invoke a single kernel function to modified the last element to 0.
+    // device_start[length-1] = 0;
+    kernel_assign<<<1, 1>>>(device_result, length-1, 0);
+    checkCuda(cudaDeviceSynchronize());
+
+    // 3. down_sweep parallel phase
+    printf("Starting down-sweep phase: \n");
+    // ATTENTION: check out the process graph located in Figure 3. the level of down-sweep is 1 more than the up-sweep phase.
+    for(int level=log2(length); level>=1; level--){
+        printf("down-sweep phase\tlevel=%d\n", level);
+        int step = pow(2, level);
+
+        kernel_scan_down_sweep<<<grid_size, block_size>>>(device_result, length, step);
+    }
+    checkCuda(cudaDeviceSynchronize());
 }
 
 /* This function is a wrapper around the code you will write - it copies the

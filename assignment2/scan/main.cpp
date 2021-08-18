@@ -22,11 +22,12 @@ void usage(const char* progname) {
     printf("  -?  --help             This message\n");
 }
 
+// cpu serial iterative method.
 void cpu_exclusive_scan(int* start, int* end, int* output)
 {
 #ifdef PARALLEL
-    int N = end - start;
-    memmove(output, start, N*sizeof(int));
+    int N= end - start;
+    memmove(output, start, N*sizeof(int));  // memmove(d, s, n);
 
     // upsweep phase
     for (int twod = 1; twod < N; twod*=2)
@@ -82,8 +83,10 @@ int main(int argc, char** argv)
     std::string input;
 
     // parse commandline options ////////////////////////////////////////////
-    int opt;
-    static struct option long_options[] = {
+    int opt; 
+    // command arguments detail: https://blog.csdn.net/qq_33850438/article/details/80172275
+    static struct option long_options[] = { 
+    //  {name, has_args, flag, val}
         {"test",       1, 0, 'm'},
         {"arraysize",  1, 0, 'n'},
         {"input",      1, 0, 'i'},
