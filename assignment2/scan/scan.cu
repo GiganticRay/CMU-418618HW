@@ -102,6 +102,7 @@ void exclusive_scan(int* device_start, int length, int* device_result)
      * both the input and the output arrays are sized to accommodate the next
      * power of 2 larger than the input.
      */
+    length = nextPow2(length);
     cudaMemcpy(device_result, device_start, length*sizeof(int), cudaMemcpyDeviceToDevice);
 
     int grid_size   = 108;
@@ -115,25 +116,23 @@ void exclusive_scan(int* device_start, int length, int* device_result)
 
         kernel_scan_up_sweep<<<grid_size, block_size>>>(device_result, length, step);
         checkLastCuda();
-        checkCuda(cudaDeviceSynchronize());
     }
 
     // 2. set the last element of mid-result to 0.`
     // NOTICE!!!!!!: manipulate device memory in host code will invoke error:"Segmentation fault (core dumped)". Instead I invoke a single kernel function to modified the last element to 0.
     // device_start[length-1] = 0;
     kernel_assign<<<1, 1>>>(device_result, length-1, 0);
-    checkCuda(cudaDeviceSynchronize());
 
     // 3. down_sweep parallel phase
     printf("Starting down-sweep phase: \n");
     // ATTENTION: check out the process graph located in Figure 3. the level of down-sweep is 1 more than the up-sweep phase.
+    printf("length: %d\n", length);
     for(int level=log2(length); level>=1; level--){
         printf("down-sweep phase\tlevel=%d\n", level);
         int step = pow(2, level);
 
         kernel_scan_down_sweep<<<grid_size, block_size>>>(device_result, length, step);
     }
-    checkCuda(cudaDeviceSynchronize());
 }
 
 /* This function is a wrapper around the code you will write - it copies the
@@ -173,8 +172,7 @@ double cudaScan(int* inarray, int* end, int* resultarray)
     double endTime = CycleTimer::currentSeconds();
     double overallDuration = endTime - startTime;
     
-    cudaMemcpy(resultarray, device_result, (end - inarray) * sizeof(int),
-               cudaMemcpyDeviceToHost);
+    cudaMemcpy(resultarray, device_result, (end - inarray) * sizeof(int), cudaMemcpyDeviceToHost);
     return overallDuration;
 }
 
@@ -208,6 +206,42 @@ double cudaScanThrust(int* inarray, int* end, int* resultarray) {
     return overallDuration;
 }
 
+/* 
+    function: set repeat logic step 1: parallel set token[i] = 1 if device_input[i+1] == device_input[i], otherwise token[i] = 0.
+*/
+__global__ void Kernel_Set_Token(int* device_input, int length, int* device_output){
+    int step    = gridDim.x * blockDim.x;
+    int threadIDX   = blockIdx.x*blockDim.x + threadIdx.x;
+
+    for (int i = threadIDX; i < length-1; i+=step)
+    {
+        if(device_input[i] == device_input[i+1]){
+            device_output[i] = 1;
+        }else{
+            device_output[i] = 0;
+        }
+
+        if(i == length-2){
+            device_output[length-1] = 0;
+        }
+    }
+}
+
+/*
+    function: set_repeat logic step 3: parallel set device_result[index[i-1 for index[i] != index[i-1]]] = i-1.
+*/
+__global__ void Kernel_Get_Repeat_From_Index(int * device_input, int length, int* device_output){
+    int step    = gridDim.x * blockDim.x;
+    int threadIDX   = blockIdx.x*blockDim.x + threadIdx.x;
+
+    for (int i = threadIDX+1; i < length; i+=step)
+    {
+        if(device_input[i] != device_input[i-1]){
+            device_output[device_input[i-1]] = i-1;
+        }
+    }
+}
+
 int find_repeats(int *device_input, int length, int *device_output) {
     /* Finds all pairs of adjacent repeated elements in the list, storing the
      * indices of the first element of each pair (in order) into device_result.
@@ -220,7 +254,36 @@ int find_repeats(int *device_input, int length, int *device_output) {
      * it requires that. However, you must ensure that the results of
      * find_repeats are correct given the original length.
      */    
-    return 0;
+
+    /* logic
+        1. parallel set token[i] = 1 if device_input[i+1] == device_input[i], otherwise token[i] = 0.
+        2. exclusive prefix_add scan token to object_index.
+        3. parallel set device_result[index[i-1 for index[i] != index[i-1]]] = i-1. 
+       ex:
+        input:  1 1 2 2 2 3 3 4 5 5
+        token:  1 0 1 1 0 1 0 0 1 0
+        index:  0 1 1 2 3 3 4 4 4 5
+        result: result[1-1] = 1-1 = 0
+                result[2-1] = 3-1 = 2
+                result[3-1] = 4-1 = 3
+                result[4-1] = 6-1 = 5
+                result[5-1] = 9-1 = 8
+
+    */
+    int grid_size   = 108;
+    int block_size  = 1024;
+    int* device_token, * device_index;
+    cudaMalloc((void **)&device_token, nextPow2(length) * sizeof(int));
+    cudaMalloc((void **)&device_index, nextPow2(length) * sizeof(int));
+    // step 1
+    Kernel_Set_Token<<<grid_size, block_size>>>(device_input, length, device_token);
+    // step 2
+    cudaScan(device_token, device_token+length, device_index);
+    // step 3
+    Kernel_Get_Repeat_From_Index<<<grid_size, block_size>>>(device_index, length, device_output);
+    int repeat_num = 0;
+    cudaMemcpy(&repeat_num, device_index+length-1, sizeof(int), cudaMemcpyDeviceToHost);
+    return repeat_num;
 }
 
 /* Timing wrapper around find_repeats. You should not modify this function.
@@ -255,6 +318,20 @@ double cudaFindRepeats(int *input, int length, int *output, int *output_length) 
 void printCudaInfo()
 {
     // for fun, just print out some stats on the machine
+
+    printf("---------------------------------------------------------\n");
+    printf("current active GPU\n");
+    int curr_deviceId;
+    cudaGetDevice(&curr_deviceId);
+    cudaDeviceProp curr_props;
+    cudaGetDeviceProperties(&curr_props, curr_deviceId);
+    cudaGetDeviceProperties(&curr_props, curr_deviceId);
+    printf("curr_Device name: %s\n", curr_props.name);
+    printf("   SMs:        %d\n", curr_props.multiProcessorCount);
+    printf("   Global mem: %.0f MB\n",
+            static_cast<float>(curr_props.totalGlobalMem) / (1024 * 1024));
+    printf("   CUDA Cap:   %d.%d\n", curr_props.major, curr_props.minor);
+
 
     int deviceCount = 0;
     cudaError_t err = cudaGetDeviceCount(&deviceCount);

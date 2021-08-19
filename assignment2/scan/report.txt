@@ -1,0 +1,17 @@
+ISSUE: checker.pl scan:
+when N > 2^14 (ex: 16385), error occurs: CUDA Runtime Error: an illegal memory access was encountered; Aborted (core dumped). But I failed to cooprated with multiple-GPU,
+
+Optimization 1: Synchronization
+using nsys tool to generate performace report. (suffix is qdrep)
+command: nsys profile --stats=true -o cudaScanReport ./cudaScan -m scan
+visualize performance of program using NVIDIA Nsight System in windows. I found that CudaDeviceSynchronize() took up most of time which far above the running time of real kernel operation. So we should comb the logic of code to limit the usage of cudaDeviceSynchronize().
+
+Q 1.1 why program runs still correctly without synchronizing operation in up-sweep and down-sweep phase?
+A: check out the working style of CUDA WORKING STREAM.
+    First we should figure out the definition of Kernel function ex:
+        kernel_scan_up_sweep<<<grid_size, block_size>>>(device_result, length, step);
+    kernel_scan_up_sweep is a kernel function, A single invokation of kernel function refers to running on a whole bunch of cudaThreads.
+    Then understand the running logic of DEFAULT STREAN. Kernel functions invoke sequentially in the default stream; Simultaneously within the un-default streams. But Keeping an eye out of DEFAULT STREAM, it is Deafult stream will block all other un-default stream.
+
+Result: performance imporved remarkably. qdrep show the result visually and directly. But I failed to analyse that numerically.
+
