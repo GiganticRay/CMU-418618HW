@@ -1,6 +1,10 @@
 ISSUE: checker.pl scan:
 when N > 2^14 (ex: 16385), error occurs: CUDA Runtime Error: an illegal memory access was encountered; Aborted (core dumped). But I failed to cooprated with multiple-GPU,
 
+    Problem targeted: The logic of Algorithm I ues involve step = pow(2, level), then in kernel fuction kernel_scan_down_sweep the condition of i*step-1 < length is used. so i*step will eventually overflow then type(int, long, long long) boundary.
+
+    Solution: I don't want to change the logic-flow of my algorithm... so what I need to do is limiting the boundary of i*step-1. If ceil(log2(i)) + ceil(log2(step)) > 31, then directly return.
+
 Optimization 1: Synchronization
 using nsys tool to generate performace report. (suffix is qdrep)
 command: nsys profile --stats=true -o cudaScanReport ./cudaScan -m scan

@@ -77,7 +77,7 @@ int cpu_find_repeats(int *start, int length, int *output){
 
 int main(int argc, char** argv)
 {
-    int N = 16385;
+    int N = 2000000;
     bool useThrust = false;
     std::string test; 
     std::string input;

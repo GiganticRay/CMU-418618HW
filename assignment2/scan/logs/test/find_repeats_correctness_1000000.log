@@ -1,0 +1,169 @@
+---------------------------------------------------------
+current active GPU
+curr_Device name: A100-PCIE-40GB
+   SMs:        108
+   Global mem: 40536 MB
+   CUDA Cap:   8.0
+---------------------------------------------------------
+Found 8 CUDA devices
+Device 0: A100-PCIE-40GB
+   SMs:        108
+   Global mem: 40536 MB
+   CUDA Cap:   8.0
+Device 1: A100-PCIE-40GB
+   SMs:        108
+   Global mem: 40536 MB
+   CUDA Cap:   8.0
+Device 2: GeForce RTX 2080 Ti
+   SMs:        68
+   Global mem: 11019 MB
+   CUDA Cap:   7.5
+Device 3: GeForce RTX 2080 Ti
+   SMs:        68
+   Global mem: 11019 MB
+   CUDA Cap:   7.5
+Device 4: GeForce RTX 2080 Ti
+   SMs:        68
+   Global mem: 11019 MB
+   CUDA Cap:   7.5
+Device 5: GeForce RTX 2080 Ti
+   SMs:        68
+   Global mem: 11019 MB
+   CUDA Cap:   7.5
+Device 6: GeForce RTX 2080 Ti
+   SMs:        68
+   Global mem: 11019 MB
+   CUDA Cap:   7.5
+Device 7: GeForce RTX 2080 Ti
+   SMs:        68
+   Global mem: 11019 MB
+   CUDA Cap:   7.5
+---------------------------------------------------------
+Starting up-sweep phase: 
+up-sweep phase	level=1
+up-sweep phase	level=2
+up-sweep phase	level=3
+up-sweep phase	level=4
+up-sweep phase	level=5
+up-sweep phase	level=6
+up-sweep phase	level=7
+up-sweep phase	level=8
+up-sweep phase	level=9
+up-sweep phase	level=10
+up-sweep phase	level=11
+up-sweep phase	level=12
+up-sweep phase	level=13
+up-sweep phase	level=14
+up-sweep phase	level=15
+up-sweep phase	level=16
+up-sweep phase	level=17
+up-sweep phase	level=18
+up-sweep phase	level=19
+Starting down-sweep phase: 
+length: 1048576
+down-sweep phase	level=20
+down-sweep phase	level=19
+down-sweep phase	level=18
+down-sweep phase	level=17
+down-sweep phase	level=16
+down-sweep phase	level=15
+down-sweep phase	level=14
+down-sweep phase	level=13
+down-sweep phase	level=12
+down-sweep phase	level=11
+down-sweep phase	level=10
+down-sweep phase	level=9
+down-sweep phase	level=8
+down-sweep phase	level=7
+down-sweep phase	level=6
+down-sweep phase	level=5
+down-sweep phase	level=4
+down-sweep phase	level=3
+down-sweep phase	level=2
+down-sweep phase	level=1
+Starting up-sweep phase: 
+up-sweep phase	level=1
+up-sweep phase	level=2
+up-sweep phase	level=3
+up-sweep phase	level=4
+up-sweep phase	level=5
+up-sweep phase	level=6
+up-sweep phase	level=7
+up-sweep phase	level=8
+up-sweep phase	level=9
+up-sweep phase	level=10
+up-sweep phase	level=11
+up-sweep phase	level=12
+up-sweep phase	level=13
+up-sweep phase	level=14
+up-sweep phase	level=15
+up-sweep phase	level=16
+up-sweep phase	level=17
+up-sweep phase	level=18
+up-sweep phase	level=19
+Starting down-sweep phase: 
+length: 1048576
+down-sweep phase	level=20
+down-sweep phase	level=19
+down-sweep phase	level=18
+down-sweep phase	level=17
+down-sweep phase	level=16
+down-sweep phase	level=15
+down-sweep phase	level=14
+down-sweep phase	level=13
+down-sweep phase	level=12
+down-sweep phase	level=11
+down-sweep phase	level=10
+down-sweep phase	level=9
+down-sweep phase	level=8
+down-sweep phase	level=7
+down-sweep phase	level=6
+down-sweep phase	level=5
+down-sweep phase	level=4
+down-sweep phase	level=3
+down-sweep phase	level=2
+down-sweep phase	level=1
+Starting up-sweep phase: 
+up-sweep phase	level=1
+up-sweep phase	level=2
+up-sweep phase	level=3
+up-sweep phase	level=4
+up-sweep phase	level=5
+up-sweep phase	level=6
+up-sweep phase	level=7
+up-sweep phase	level=8
+up-sweep phase	level=9
+up-sweep phase	level=10
+up-sweep phase	level=11
+up-sweep phase	level=12
+up-sweep phase	level=13
+up-sweep phase	level=14
+up-sweep phase	level=15
+up-sweep phase	level=16
+up-sweep phase	level=17
+up-sweep phase	level=18
+up-sweep phase	level=19
+Starting down-sweep phase: 
+length: 1048576
+down-sweep phase	level=20
+down-sweep phase	level=19
+down-sweep phase	level=18
+down-sweep phase	level=17
+down-sweep phase	level=16
+down-sweep phase	level=15
+down-sweep phase	level=14
+down-sweep phase	level=13
+down-sweep phase	level=12
+down-sweep phase	level=11
+down-sweep phase	level=10
+down-sweep phase	level=9
+down-sweep phase	level=8
+down-sweep phase	level=7
+down-sweep phase	level=6
+down-sweep phase	level=5
+down-sweep phase	level=4
+down-sweep phase	level=3
+down-sweep phase	level=2
+down-sweep phase	level=1
+GPU_time: 4.283 ms
+Find_repeats outputs are correct!

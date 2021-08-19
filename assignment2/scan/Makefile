@@ -17,7 +17,8 @@ CXX=g++ -m64
 CXXFLAGS=-O3 -Wall
 LDFLAGS=-L/usr/local/cuda-11.1/lib64/ -lcudart
 NVCC=nvcc
-NVCCFLAGS=-O3 -m64 --gpu-architecture compute_75
+NVCCFLAGS=-O3 -m64 --gpu-architecture compute_75 --expt-relaxed-constexpr
+# --expt-relaxed-constexpr is used to allow invoking host function in kernel function
 
 
 OBJS=$(OBJDIR)/main.o  $(OBJDIR)/scan.o

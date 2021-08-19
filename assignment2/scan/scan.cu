@@ -69,6 +69,10 @@ __global__ void kernel_scan_up_sweep(int* device_array, int length, int step){
     int grid_size = gridDim.x*blockDim.x;
     for (int i = index+1; i*step-1 < length; i+=grid_size)
     {
+        int log_sum = ceil(log2(i)) + ceil(log2(step));
+        if(log_sum > 31){
+            return;
+        }
         device_array[i*step-1] += device_array[i*step - step/2 - 1]; 
     }
 }
@@ -79,6 +83,12 @@ __global__ void kernel_scan_down_sweep(int* device_array, int length, int step){
     int grid_size = gridDim.x*blockDim.x;
     for (int i = index+1; i*step-1 < length; i+=grid_size)
     {
+        // as for i or step individually, it can't overflow. And of course the index of array can't overflow at all, so we could judge the log-sum of i and step
+        // this process is so-called boundary-processing.
+        int log_sum = ceil(log2(i)) + ceil(log2(step));
+        if(log_sum > 31){
+            return;
+        }
         int tmp = device_array[i*step - step/2 - 1];
         device_array[i*step - step/2 - 1] = device_array[i*step-1];
         device_array[i*step-1] += tmp;
