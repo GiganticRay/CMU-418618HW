@@ -22,15 +22,15 @@ LIBS       :=
 FRAMEWORKS :=
 
 #TODO switch to 61 and update ref
-NVCCFLAGS=-O3 -m64 --gpu-architecture compute_35
+NVCCFLAGS=-O3 -m64 --gpu-architecture compute_75
 LIBS += GL glut cudart
 
-ifneq ($(wildcard /opt/cuda-8.0/.*),)
+ifneq ($(wildcard /usr/local/cuda-11.1/.*),)
 # Latedays
-LDFLAGS=-L/opt/cuda-8.0/lib64/ -lcudart
+LDFLAGS=-L/usr/local/cuda-11.1/lib64/ -lcudart
 else
 # GHC
-LDFLAGS=-L/usr/local/depot/cuda-8.0/lib64/ -lcudart
+LDFLAGS=-L/usr/local/cuda-11.1/lib64/ -lcudart
 endif
 
 LDLIBS  := $(addprefix -l, $(LIBS))

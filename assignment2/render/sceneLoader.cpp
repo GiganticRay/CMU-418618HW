@@ -163,12 +163,11 @@ loadCircleScene(
 
         // 100K circles
         //
-        // Circles are sorted in reverse depth order (farthest first).
-        // This order must be respected by the renderer for correct
-        // transparency rendering.
+        // Circles are sorted in reverse depth order (farthest first from camera). This order must be respected by the renderer for correct transparency rendering.
 
         numCircles = 100 * 1000;
 
+        // the factor 3?
         position = new float[3 * numCircles];
         velocity = new float[3 * numCircles];
         color = new float[3 * numCircles];
@@ -177,12 +176,14 @@ loadCircleScene(
         srand(0);
         std::vector<float> depths(numCircles);
 
+        // the reason of using float instead of int: boundary of int type is limiting.
+        // get the random depth for every circle.
         for (int i=0; i<numCircles; i++) {
             // most of the circles are farther away from the camera
             depths[i] = CLAMP(powf((static_cast<float>(i) / numCircles), .1f) + (-.05f + .1f * randomFloat()), 0.f, 1.f);
         }
 
-        // sort the depths, and then assign depths to particles
+        // sort the depths, and then assign depths to particles, [4, 3, 2, 1]
         std::sort(depths.begin(), depths.end(), std::greater<float>());
 
         const static float kMinSnowRadius = .0075f;
@@ -191,6 +192,7 @@ loadCircleScene(
 
             float depth = depths[i];
 
+            // closeSize -> random actualSize -- combined with depth -> radius for each circle
             float closeSize = .08f;
             float actualSize = closeSize - .0075f + (.015f * randomFloat());
             radius[i] = ((1.f - depth) * actualSize) + (depth * actualSize / 15.f);
@@ -199,10 +201,13 @@ loadCircleScene(
             else if (radius[i] < kMinSnowRadius)
                 radius[i] = kMinSnowRadius;
 
+            // each circle has three types of position and three types of velocity?
             int index3 = 3 * i;
             position[index3] = randomFloat();
-            position[index3+1] = 1.f + radius[i] + 2.f * randomFloat();
-            position[index3+2] = depth;
+            position[index3+1] = 1.f + radius[i] + 2.f * randomFloat(); // what's this?
+            position[index3+2] = depth; // depth is put in position?
+
+            // colour 呢？
 
             velocity[index3] = 0.f;
             velocity[index3+1] = 0.f;
@@ -212,7 +217,6 @@ loadCircleScene(
     }else if (sceneName == BOUNCING_BALLS) {
         srand(0);
         numCircles = 10;   
-        position = new float[3 * numCircles]; 
         position = new float[3 * numCircles];
         velocity = new float[3 * numCircles];  
         color = new float[3 * numCircles]; 
@@ -226,6 +230,7 @@ loadCircleScene(
             position[index3+1] = randomFloat();
             position[index3+2] = randomFloat(); 
 
+            // all are black balls?
             color[index3] = 0.f;
             color[index3+1] = 0.f;
             color[index3+2] = 0.f;
@@ -248,12 +253,14 @@ loadCircleScene(
 
         for (int i = 0; i < numCircles; i++) { 
             int index3 = 3 * i; 
+            // the position of every circle is the same.
             position[index3] = position[index3+1] = .5f;
             position[index3+2] = .0f;
 
             // increasing radius
             radius[i] = 0.02f + (i * width);  
 
+            // rgb
             color[index3] = randomFloat(); 
             color[index3+1] = randomFloat();
             color[index3+2] = randomFloat();
@@ -265,8 +272,10 @@ loadCircleScene(
     } else if (sceneName == FIREWORKS) {
         srand(0); 
         const float pi = 3.14159;  
+        // every fireworks is associated with #NUM_SPARKS sparks.
         numCircles = NUM_FIREWORKS + NUM_FIREWORKS * NUM_SPARKS;
 
+        // organization: fireworks | sparks of firework1 | sparks of firework2 | sparks of firework2 | ... | sparks of fireworkn
         position = new float[3 * numCircles]; 
         color = new float[3 * numCircles]; 
         radius = new float[numCircles];

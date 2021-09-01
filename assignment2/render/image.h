@@ -10,6 +10,7 @@ struct Image {
         data = new float[4 * width * height];
     }
 
+    // assign the image with certain rgba
     void clear(float r, float g, float b, float a) {
 
         int numPixels = width * height;

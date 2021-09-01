@@ -71,6 +71,7 @@ startBenchmark(
     if (dumpFrames)
         printf("Dumping frames to %s_xxx.ppm\n", frameFilename.c_str());
 
+    // still paint from 0 frame.
     for (int frame=0; frame<startFrame + totalFrames; frame++) {
 
         if (frame == startFrame)

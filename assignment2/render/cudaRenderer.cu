@@ -33,15 +33,10 @@ struct GlobalConstants {
     float* imageData;
 };
 
-// Global variable that is in scope, but read-only, for all cuda
-// kernels.  The __constant__ modifier designates this variable will
-// be stored in special "constant" memory on the GPU. (we didn't talk
-// about this type of memory in class, but constant memory is a fast
-// place to put read-only variables).
+// Global variable that is in scope, but read-only, for all cuda kernels.  The __constant__ modifier designates this variable will be stored in special "constant" memory on the GPU. (we didn't talk about this type of memory in class, but constant memory is a fast place to put read-only variables).
 __constant__ GlobalConstants cuConstRendererParams;
 
-// read-only lookup tables used to quickly compute noise (needed by
-// advanceAnimation for the snowflake scene)
+// read-only lookup tables used to quickly compute noise (needed by advanceAnimation for the snowflake scene)
 __constant__ int    cuConstNoiseYPermutationTable[256];
 __constant__ int    cuConstNoiseXPermutationTable[256];
 __constant__ float  cuConstNoise1DValueTable[256];
@@ -51,8 +46,7 @@ __constant__ float  cuConstNoise1DValueTable[256];
 __constant__ float  cuConstColorRamp[COLOR_MAP_SIZE][3];
 
 
-// including parts of the CUDA code from external files to keep this
-// file simpler and to seperate code that should not be modified
+// including parts of the CUDA code from external files to keep this file simpler and to seperate code that should not be modified
 #include "noiseCuda.cu_inl"
 #include "lookupColor.cu_inl"
 
@@ -380,8 +374,7 @@ shadePixel(int circleIndex, float2 pixelCenter, float3 p, float4* imagePtr) {
 // kernelRenderCircles -- (CUDA device code)
 //
 // Each thread renders a circle.  Since there is no protection to
-// ensure order of update or mutual exclusion on the output image, the
-// resulting image will be incorrect.
+// ensure order of update or mutual exclusion on the output image, the resulting image will be incorrect.
 __global__ void kernelRenderCircles() {
 
     int index = blockIdx.x * blockDim.x + threadIdx.x;
@@ -395,8 +388,7 @@ __global__ void kernelRenderCircles() {
     float3 p = *(float3*)(&cuConstRendererParams.position[index3]);
     float  rad = cuConstRendererParams.radius[index];
 
-    // compute the bounding box of the circle. The bound is in integer
-    // screen coordinates, so it's clamped to the edges of the screen.
+    // compute the bounding box of the circle. The bound is in integer screen coordinates, so it's clamped to the edges of the screen.
     short imageWidth = cuConstRendererParams.imageWidth;
     short imageHeight = cuConstRendererParams.imageHeight;
     short minX = static_cast<short>(imageWidth * (p.x - rad));
@@ -511,12 +503,9 @@ CudaRenderer::setup() {
     }
     printf("---------------------------------------------------------\n");
 
-    // By this time the scene should be loaded.  Now copy all the key
-    // data structures into device memory so they are accessible to
-    // CUDA kernels
+    // By this time the scene should be loaded.  Now copy all the key data structures into device memory so they are accessible to CUDA kernels
     //
-    // See the CUDA Programmer's Guide for descriptions of
-    // cudaMalloc and cudaMemcpy
+    // See the CUDA Programmer's Guide for descriptions of cudaMalloc and cudaMemcpy
 
     cudaMalloc(&cudaDevicePosition, sizeof(float) * 3 * numCircles);
     cudaMalloc(&cudaDeviceVelocity, sizeof(float) * 3 * numCircles);
@@ -529,13 +518,8 @@ CudaRenderer::setup() {
     cudaMemcpy(cudaDeviceColor, color, sizeof(float) * 3 * numCircles, cudaMemcpyHostToDevice);
     cudaMemcpy(cudaDeviceRadius, radius, sizeof(float) * numCircles, cudaMemcpyHostToDevice);
 
-    // Initialize parameters in constant memory.  We didn't talk about
-    // constant memory in class, but the use of read-only constant
-    // memory here is an optimization over just sticking these values
-    // in device global memory.  NVIDIA GPUs have a few special tricks
-    // for optimizing access to constant memory.  Using global memory
-    // here would have worked just as well.  See the Programmer's
-    // Guide for more information about constant memory.
+    // Initialize parameters in constant memory.  We didn't talk about constant memory in class, but the use of read-only constant memory here is an optimization over just sticking these values in device global memory.  NVIDIA GPUs have a few special tricks for optimizing access to constant memory.  Using global memory here would have worked just as well.  
+    // See the Programmer's Guide for more information about constant memory.
 
     GlobalConstants params;
     params.sceneName = sceneName;
@@ -577,8 +561,7 @@ CudaRenderer::setup() {
 
 // allocOutputImage --
 //
-// Allocate buffer the renderer will render into.  Check status of
-// image first to avoid memory leak.
+// Allocate buffer the renderer will render into.  Check status of image first to avoid memory leak.
 void
 CudaRenderer::allocOutputImage(int width, int height) {
 
@@ -589,8 +572,7 @@ CudaRenderer::allocOutputImage(int width, int height) {
 
 // clearImage --
 //
-// Clear's the renderer's target image.  The state of the image after
-// the clear depends on the scene being rendered.
+// Clear's the renderer's target image.  The state of the image after the clear depends on the scene being rendered.
 void
 CudaRenderer::clearImage() {
 
@@ -638,6 +620,7 @@ CudaRenderer::render() {
     dim3 blockDim(256, 1);
     dim3 gridDim((numCircles + blockDim.x - 1) / blockDim.x);
 
+    // it can be indicated that every circle's render working is assigned to a cuda-thread.
     kernelRenderCircles<<<gridDim, blockDim>>>();
     cudaDeviceSynchronize();
 }

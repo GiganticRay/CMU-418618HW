@@ -29,12 +29,11 @@ void usage(const char* progname) {
 
 int main(int argc, char** argv)
 {
-
-    int benchmarkFrameStart = -1;
+    int benchmarkFrameStart = -1;   // the start frame number in benchmark version.
     int benchmarkFrameEnd = -1;
     int imageSize = 1024;
 
-    std::string sceneNameStr;
+    std::string sceneNameStr;   // used to accept the command option.
     std::string frameFilename;
     SceneName sceneName;
     bool useRefRenderer = true;
@@ -42,6 +41,16 @@ int main(int argc, char** argv)
     bool checkCorrectness = false;
 
     // parse commandline options ////////////////////////////////////////////
+    /*
+        https://man7.org/linux/man-pages/man3/getopt.3.html
+        long_options is in the type of: 
+        struct option {
+               const char *name;
+               int         has_arg; // 0, 1, 2
+               int        *flag;
+               int         val;     // the value to return
+           };
+    */
     int opt;
     static struct option long_options[] = {
         {"help",     0, 0,  '?'},
@@ -50,15 +59,19 @@ int main(int argc, char** argv)
         {"file",     1, 0,  'f'},
         {"renderer", 1, 0,  'r'},
         {"size",     1, 0,  's'},
+        // the last element of the array has to be filled with zeros.
         {0 ,0, 0, 0}
     };
 
+    // return the option character, If there are no more option characters, getopt() returns -1. then why the condition is EOF here?
     while ((opt = getopt_long(argc, argv, "b:f:r:s:c?", long_options, NULL)) != EOF) {
 
         switch (opt) {
         case 'b':
+            // sscanf: read data from s, fill them into additional arguments, just like scanf but reading from s instead of from standard ipnut.
+            // if there is text in the current argv-element, then it's returned in optarg, otherwise optarg is set to be 0, optarg is auto-filled with the subsequent text( value ).
             if (sscanf(optarg, "%d:%d", &benchmarkFrameStart, &benchmarkFrameEnd) != 2) {
-                fprintf(stderr, "Invalid argument to -b option\n");
+                fprintf(stderr, "Invalid argument to - b option\n");
                 usage(argv[0]);
                 exit(1);
             }
@@ -85,7 +98,7 @@ int main(int argc, char** argv)
     }
     // end parsing of commandline options //////////////////////////////////////
 
-
+    // the last command param is not option param, so we can't use getopt to get it instead of getting it using optind(option param index)
     if (optind + 1 > argc) {
         fprintf(stderr, "Error: missing scene name\n");
         usage(argv[0]);
@@ -103,6 +116,7 @@ int main(int argc, char** argv)
     } else if (sceneNameStr.compare("rgby") == 0) {
         sceneName = CIRCLE_RGBY;
     } else if (sceneNameStr.compare("rand10k") == 0) {
+        // render #10k bubbles.
         sceneName = CIRCLE_TEST_10K;
     } else if (sceneNameStr.compare("rand100k") == 0) {
         sceneName = CIRCLE_TEST_100K;
@@ -113,10 +127,14 @@ int main(int argc, char** argv)
     } else if (sceneNameStr.compare("littlebig") == 0) {
         sceneName = LITTLE_BIG;
     } else if (sceneNameStr.compare("bouncingballs") == 0) {
+        // dynamic
         sceneName = BOUNCING_BALLS;  
     } else if (sceneNameStr.compare("hypnosis") == 0) { 
+        // dymamic
+        // hypnosis: hɪpnoʊsɪs, Hypnosis is a state in which a person seems to be asleep but can still see, hear, or respond to things said to them. so the picture it produces is just like the rippling water.
         sceneName = HYPNOSIS;           
     } else if (sceneNameStr.compare("fireworks") == 0) { 
+        // em... all right, the shape of fireworks also like rippling water but disperesed in different position.
         sceneName = FIREWORKS;    
     }else {
         fprintf(stderr, "Unknown scene name (%s)\n", sceneNameStr.c_str());
@@ -126,11 +144,12 @@ int main(int argc, char** argv)
 
     printf("Rendering to %dx%d image\n", imageSize, imageSize);
 
+    // abstract hper circle renderer.
     CircleRenderer* renderer;
 
     if (checkCorrectness) {
-        // Need both the renderers
 
+        // Need both the renderers
         CircleRenderer* ref_renderer;
         CircleRenderer* cuda_renderer;
 
@@ -140,6 +159,7 @@ int main(int argc, char** argv)
         ref_renderer->allocOutputImage(imageSize, imageSize);
         ref_renderer->loadScene(sceneName);
         ref_renderer->setup();
+
         cuda_renderer->allocOutputImage(imageSize, imageSize);
         cuda_renderer->loadScene(sceneName);
         cuda_renderer->setup();
@@ -148,7 +168,6 @@ int main(int argc, char** argv)
         CheckBenchmark(ref_renderer, cuda_renderer, 0, 1, frameFilename);
     }
     else {
-
         if (useRefRenderer)
             renderer = new RefRenderer();
         else
@@ -158,6 +177,7 @@ int main(int argc, char** argv)
         renderer->loadScene(sceneName);
         renderer->setup();
 
+        // showing window is not opened in benchmark model
         if (benchmarkFrameStart >= 0)
             startBenchmark(renderer, benchmarkFrameStart, benchmarkFrameEnd - benchmarkFrameStart, frameFilename);
         else {

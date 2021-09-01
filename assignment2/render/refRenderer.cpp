@@ -45,11 +45,9 @@ RefRenderer::setup() {
 
 // allocOutputImage --
 //
-// Allocate buffer the renderer will render into.  Check status of
-// image first to avoid memory leak.
+// Allocate buffer the renderer will render into.  Check status of image first to avoid memory leak.
 void
 RefRenderer::allocOutputImage(int width, int height) {
-
     if (image)
         delete image;
     image = new Image(width, height);
@@ -57,13 +55,11 @@ RefRenderer::allocOutputImage(int width, int height) {
 
 // clearImage --
 //
-// Clear's the renderer's target image.  The state of the image after
-// the clear depends on the scene being rendered.
+// Clear's the renderer's target image.  The state of the image after the clear depends on the scene being rendered.
 void
 RefRenderer::clearImage() {
 
-    // clear image to white unless this is the snowflake scene.  For
-    // the snowflake clear the image to a more pleasing color ramp
+    // clear image to white unless this is the snowflake scene.  For the snowflake clear the image to a more pleasing color ramp
 
     if (sceneName == SNOWFLAKES || sceneName == SNOWFLAKES_SINGLE_FRAME) {
 
@@ -89,12 +85,11 @@ RefRenderer::loadScene(SceneName scene) {
 
 // advanceAnimation --
 //
-// Advance the simulation one time step.  Updates all circle positions
-// and velocities
+// Advance the simulation one time step.  Updates all circle positions and velocities
 void
 RefRenderer::advanceAnimation() {
 
-    // only the snowflake scene has animation
+    // only the snowflake (100k circles) scene has animation
 
     if (sceneName == SNOWFLAKES) {
 
@@ -332,12 +327,8 @@ RefRenderer::shadePixel(
     }
 
     // The following code is *very important*: it blends the
-    // contribution of the circle primitive with the current state
-    // of the output image pixel.  This is a read-modify-write
-    // operation on the image, and it needs to be atomic.  Moreover,
-    // (and even more challenging) all writes to this pixel must be
-    // performed in same order as when the circles are processed
-    // serially.
+    // contribution of the circle primitive with the current state of the output image pixel.  This is a read-modify-write
+    // operation on the image, and it needs to be atomic.  Moreover, (and even more challenging) all writes to this pixel must be performed in same order as when the circles are processed serially.
     //
     // That is, if circle 1 and circle 2 both write to pixel P.
     // circle 1's contribution *must* be blended in first, then
@@ -351,10 +342,9 @@ RefRenderer::shadePixel(
     pixelData[3] += alpha;
 }
 
+// render all circles based on the refRenderobject.
 void
 RefRenderer::render() {
-
-    // render all circles
     for (int circleIndex=0; circleIndex<numCircles; circleIndex++) {
 
         int index3 = 3 * circleIndex;
@@ -364,15 +354,14 @@ RefRenderer::render() {
         float pz = position[index3+2];
         float rad = radius[circleIndex];
 
-        // compute the bounding box of the circle.  This bounding box
-        // is in normalized coordinates
+        // compute the bounding box of the circle.  This bounding box is in normalized coordinates
+        // normalized coordinates: 
         float minX = px - rad;
         float maxX = px + rad;
         float minY = py - rad;
         float maxY = py + rad;
 
-        // convert normalized coordinate bounds to integer screen
-        // pixel bounds.  Clamp to the edges of the screen.
+        // convert normalized coordinate bounds to integer screen  pixel bounds.  Clamp to the edges of the screen.
         int screenMinX = CLAMP(static_cast<int>(minX * image->width), 0, image->width);
         int screenMaxX = CLAMP(static_cast<int>(maxX * image->width)+1, 0, image->width);
         int screenMinY = CLAMP(static_cast<int>(minY * image->height), 0, image->height);
@@ -381,11 +370,7 @@ RefRenderer::render() {
         float invWidth = 1.f / image->width;
         float invHeight = 1.f / image->height;
 
-        // for each pixel in the bounding box, determine the circle's
-        // contribution to the pixel.  The contribution is computed in
-        // the function shadePixel.  Since the circle does not fill
-        // the bounding box entirely, not every pixel in the box will
-        // receive contribution.
+        // for each pixel in the bounding box, determine the circle's contribution to the pixel.  The contribution is computed in the function shadePixel.  Since the circle does not fill the bounding box entirely, not every pixel in the box will receive contribution.
         for (int pixelY=screenMinY; pixelY<screenMaxY; pixelY++) {
 
             // pointer to pixel data
@@ -393,16 +378,12 @@ RefRenderer::render() {
 
             for (int pixelX=screenMinX; pixelX<screenMaxX; pixelX++) {
 
-                // When "shading" the pixel ("shading" = computing the
-                // circle's color and opacity at the pixel), we treat
-                // the pixel as a point at the center of the pixel.
-                // We'll compute the color of the circle at this
-                // point.  Note that shading math will occur in the
-                // normalized [0,1]^2 coordinate space, so we convert
-                // the pixel center into this coordinate space prior
-                // to calling shadePixel.
+                // When "shading" the pixel ("shading" = computing the circle's color and opacity at the pixel), we treat the pixel as a point at the center of the pixel. We'll compute the color of the circle at this point.  
+                // Note that shading math will occur in the normalized [0,1]^2 coordinate space, so we convert the pixel center into this coordinate space prior to calling shadePixel.
                 float pixelCenterNormX = invWidth * (static_cast<float>(pixelX) + 0.5f);
+
                 float pixelCenterNormY = invHeight * (static_cast<float>(pixelY) + 0.5f);
+
                 shadePixel(circleIndex, pixelCenterNormX, pixelCenterNormY, px, py, pz, imgPtr);
                 imgPtr += 4;
             }
